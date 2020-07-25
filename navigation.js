@@ -7,6 +7,7 @@ import {ScrollView, View, Text, Dimensions} from "react-native";
  import Medicaments from './component/Medicaments';
  import MedicamentDetaille from './component/MedicamentDetaille';
 import PharmacieDetaille from "./component/PharmacieDetaille";
+import Operations from './component/Operations';
 
 
 const medicamentStack = createStackNavigator({
@@ -112,11 +113,43 @@ const DrawerContent = (props) => {
                  <Icon name='medkit' type="font-awesome" color={tintColor}/>
              )
          }
-     }
+     },
+     Operations: {
+        screen: createStackNavigator({
+            Medicaments: {
+                screen: Operations,
+                navigationOptions: ({navigation}) => ({
+                    title: 'Operations',
+                    headerStyle: {
+                        backgroundColor: '#7bdfa0',
+                        borderBottomWidth: 2,
+                        borderBottomColor: '#7bdfa0'
+                    },
+                    headerTintColor: '#fff',
+                    headerTitleAlign: 'center',
+                    headerRight: () => (
+                        <Icon
+                            onPress={() => navigation.openDrawer()}
+                            name="bars" type="font-awesome" containerStyle={{marginHorizontal: 15}}
+                            color="#fff"
+                        />
+                    ),
+                }),
+            }
+        }),
+        navigationOptions: {
+            drawerLabel: 'Operations',
+            drawerIcon: ({tintColor}) => (
+                <Icon name='sliders' type="feather" color={tintColor}/>
+            )
+        }
+    }
 
  }, {
+     initialRouteName : 'Pharmacies',
      contentComponent: DrawerContent,
      drawerWidth: Dimensions.get('window').width * 0.85,
+     unmountInactiveRoutes : true,
      hideStatusBar: true,
      contentOptions: {
          activeTintColor: '#f8961e',

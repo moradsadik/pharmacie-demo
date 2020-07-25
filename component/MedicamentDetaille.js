@@ -1,8 +1,9 @@
 import React, {Component} from "react";
-import {View, Text} from "react-native";
-import {getMedicamentById, getPharmacieById} from "../repositories/repositorie";
+import {View, Text, ActivityIndicator} from "react-native";
 import {coeffMultiplicateur, prixAchatNet, prixVenteNet} from "../metiers/metier";
 import {PricingCard} from "react-native-elements";
+import * as repo from "../repositories/repositorie";
+import {getMedicamentById} from "../services/Services";
 
 
 export default class MedicamentDetaille extends Component{
@@ -17,22 +18,32 @@ export default class MedicamentDetaille extends Component{
             id : null,
             name : null,
             taux: null,
-            prixBrut:null
+            coeff : 2,
+            prixBrut:null,
+            loading : true
         }
     }
 
-    componentDidMount() {
-        let key =this.props.navigation.getParam('id');
-        let {id, name, prixBrut, taux} = getMedicamentById(key)
+    async componentDidMount() {
+        let mid =this.props.navigation.getParam('id');
+        console.log("id : ",mid)
+        let {id, name, prixBrut, taux} = await getMedicamentById(repo, mid);
         console.log(id, name, prixBrut, taux)
-        this.setState({id, name, prixBrut, taux})
+        this.setState({id, name, prixBrut, taux, loading : false})
     }
 
     render() {
-        let {id, name, prixBrut, taux} = this.state
+        let {id, name, prixBrut, taux, loading, coeff} = this.state
         let prix_achat_net = prixAchatNet(prixBrut, taux/100)
-        let prix_vente_net = prixVenteNet(prix_achat_net, 2)
+        let prix_vente_net = prixVenteNet(prix_achat_net, coeff)
         let coeff_multiplicateur = coeffMultiplicateur(prix_achat_net, prix_vente_net )
+
+        if(loading){
+            return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}  >
+                <ActivityIndicator size='large' color="#7bdfa0" />
+            </View>
+        }
+
         return (
             <View style={{ flex: 1 }}>
                 <PricingCard

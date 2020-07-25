@@ -1,7 +1,7 @@
 import React, {Component} from "react";
-import {View, Text, FlatList, TouchableWithoutFeedback} from "react-native";
+import {View, Text, FlatList, TouchableWithoutFeedback, ActivityIndicator} from "react-native";
 import {getMedicaments} from "../services/Services";
-import {Icon} from "react-native-elements";
+import {Icon, Button} from "react-native-elements";
 import * as repository from "../repositories/repositorie";
 
 class Medicaments extends Component{
@@ -12,35 +12,42 @@ class Medicaments extends Component{
             medicaments : [],
             medicament : {},
             search : null,
-            message : null
+            message : null,
+            loading : true
         }
     }
 
-    componentDidMount() {
-        this.setState({medicaments : getMedicaments(repository)})
+    async componentDidMount() {
+        const medicaments = await getMedicaments(repository);
+        this.setState({medicaments, loading:false})
     }
 
-
     render() {
-        let {medicaments} = this.state
+        let {medicaments, loading} = this.state
         let {navigation} = this.props;
 
-
+        if(loading){
+            return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}  >
+                <ActivityIndicator size='large' color="#7bdfa0" />
+            </View>
+        }
         return (<View>
             <FlatList
-                keyExtractor={item => item.id+''}
+                keyExtractor={item => item.ref}
                 data={medicaments}
-                renderItem={({ item }) => <View style={{flexDirection: 'row',justifyContent: 'space-between',
-                    paddingVertical:10, paddingHorizontal:10, borderBottomWidth:1, borderColor: '#dbdbdb', marginBottom : 5}}>
-                    <View>
-                        <View><Text style={{fontSize: 20, fontWeight : 'bold', color:'#317b82', textTransform: 'capitalize'}}>{item.name}</Text></View>
+                renderItem={({ item }) => 
+                    <TouchableWithoutFeedback onPress={ () => navigation.navigate('MedicamentDetaille', {id : item.ref})}>
+                    <View style={{flexDirection: 'row',justifyContent: 'space-between',
+                        paddingVertical:10, paddingHorizontal:10, borderBottomWidth:1, borderColor: '#dbdbdb', marginBottom : 5}}>
+                        <View>
+                            <View><Text style={{fontSize: 20, fontWeight : 'bold', color:'#317b82', textTransform: 'capitalize'}}>{item.name}</Text></View>
+                        </View>
+                        <View style={{justifyContent: 'center'}}>
+                                <Icon name="chevron-right" type="font-awesome" iconStyle={{color:'#879e9a',fontWeight: 'normal', fontSize: 15}} />
+                        </View>
                     </View>
-                    <View style={{justifyContent: 'center'}}>
-                        <TouchableWithoutFeedback onPress={ () => navigation.navigate('MedicamentDetaille', {id : item.id})}>
-                            <Icon name="chevron-right" type="font-awesome" iconStyle={{color:'#879e9a',fontWeight: 'normal', fontSize: 15}} />
-                        </TouchableWithoutFeedback>
-                    </View>
-                </View>}
+                    </TouchableWithoutFeedback>
+                }
             />
         </View>);
     }
